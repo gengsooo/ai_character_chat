@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { User, Briefcase, Heart, MapPin, Palette, RefreshCw } from 'lucide-react';
 import { CharacterInfo, ImageGenerationResult } from '@/types/character';
@@ -39,12 +39,12 @@ const CharacterDisplay = ({ character, onImageGenerated }: CharacterDisplayProps
       hasInitialized.current = true;
       generateCharacterImage();
     }
-  }, [character.id, generatedImage, isGeneratingImage]);
+  }, [character.id, generatedImage, isGeneratingImage, generateCharacterImage]);
 
   /**
    * 캐리커쳐 이미지 생성 함수
    */
-  const generateCharacterImage = async (style: 'caricature' | 'cartoon' | 'realistic' = 'caricature') => {
+  const generateCharacterImage = useCallback(async (style: 'caricature' | 'cartoon' | 'realistic' = 'caricature') => {
     if (isGeneratingImage) {
       return;
     }
@@ -82,7 +82,7 @@ const CharacterDisplay = ({ character, onImageGenerated }: CharacterDisplayProps
     } finally {
       setIsGeneratingImage(false);
     }
-  };
+  }, [character, isGeneratingImage, onImageGenerated]);
 
   /**
    * 외모 정보 포맷팅

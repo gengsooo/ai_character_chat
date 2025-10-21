@@ -201,7 +201,6 @@ const HomePage = () => {
       {character && (
         <CharacterDisplay 
           character={character}
-          imageUrl={characterImageUrl}
           onImageGenerated={handleImageGenerated}
         />
       )}

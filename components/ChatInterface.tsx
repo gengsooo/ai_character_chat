@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { CharacterInfo, ChatMessage } from '@/types/character';
+import Image from 'next/image';
 
 interface ChatInterfaceProps {
   character: CharacterInfo;
@@ -174,27 +175,20 @@ const ChatInterface = ({ character, imageUrl }: ChatInterfaceProps) => {
       {/* 헤더 */}
       <div className="flex items-center space-x-3 p-4 border-b border-gray-200">
         {/* 캐릭터 이미지 또는 기본 아바타 */}
-        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-secondary-500 flex items-center justify-center">
           {imageUrl ? (
-            <img 
+            <Image 
               src={imageUrl} 
               alt={character.name}
+              width={40}
+              height={40}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                  parent.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-white"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>';
-                }
-              }}
             />
           ) : (
-            <Bot className="w-4 h-4 text-white" />
+            <Bot className="w-5 h-5 text-white" />
           )}
         </div>
-         {/* 캐릭터 정보 */}
-         <div>
+        <div>
           <h3 className="font-semibold text-gray-800">{character.name}</h3>
           <p className="text-sm text-gray-500">
             {character.background?.occupation || 'AI 어시스턴트'}
@@ -209,8 +203,18 @@ const ChatInterface = ({ character, imageUrl }: ChatInterfaceProps) => {
         {/* 로딩 인디케이터 */}
         {isLoading && (
           <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary-500 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-secondary-500 flex items-center justify-center">
+              {imageUrl ? (
+                <Image 
+                  src={imageUrl} 
+                  alt={character.name}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Bot className="w-4 h-4 text-white" />
+              )}
             </div>
             <div className="flex-1">
               <div className="inline-block px-4 py-2 bg-gray-100 rounded-lg rounded-bl-sm">
