@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { User, Briefcase, Heart, MapPin, Palette, RefreshCw } from 'lucide-react';
 import { CharacterInfo, ImageGenerationResult } from '@/types/character';
@@ -17,20 +17,38 @@ const CharacterDisplay = ({ character, onImageGenerated }: CharacterDisplayProps
   const [generatedImage, setGeneratedImage] = useState<string>('');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageError, setImageError] = useState<string>('');
+  
+  // useRef로 생성 상태를 추적하여 중복 호출 방지
+  const hasInitialized = useRef(false);
+  const currentCharacterId = useRef<string>('');
 
   /**
-   * 컴포넌트 마운트 시 자동으로 이미지 생성
+   * 컴포넌트 마운트 시 자동으로 이미지 생성 (한 번만)
    */
   useEffect(() => {
-    if (character && !generatedImage) {
+    // 새로운 캐릭터인 경우에만 초기화
+    if (character.id !== currentCharacterId.current) {
+      hasInitialized.current = false;
+      currentCharacterId.current = character.id;
+      setGeneratedImage('');
+      setImageError('');
+    }
+
+    // 아직 초기화되지 않았고, 이미지가 없고, 생성 중이 아닐 때만 생성
+    if (!hasInitialized.current && !generatedImage && !isGeneratingImage) {
+      hasInitialized.current = true;
       generateCharacterImage();
     }
-  }, [character]);
+  }, [character.id, generatedImage, isGeneratingImage]);
 
   /**
    * 캐리커쳐 이미지 생성 함수
    */
   const generateCharacterImage = async (style: 'caricature' | 'cartoon' | 'realistic' = 'caricature') => {
+    if (isGeneratingImage) {
+      return;
+    }
+    
     setIsGeneratingImage(true);
     setImageError('');
 
@@ -60,6 +78,7 @@ const CharacterDisplay = ({ character, onImageGenerated }: CharacterDisplayProps
       console.error('이미지 생성 오류:', error);
       const errorMessage = error instanceof Error ? error.message : '이미지 생성 중 오류가 발생했습니다.';
       setImageError(errorMessage);
+      hasInitialized.current = false; // 실패 시 재시도 가능하도록 리셋
     } finally {
       setIsGeneratingImage(false);
     }

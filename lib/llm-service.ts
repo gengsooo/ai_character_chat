@@ -45,7 +45,15 @@ export class LLMService {
 다음 텍스트에서 인물의 정보를 추출하여 JSON 형태로 정리해주세요.
 추출할 정보:
 1. 이름 (name)
-2. 외모 정보 (appearance): 나이, 성별, 키, 체형, 머리색, 머리스타일, 눈색, 얼굴 특징, 옷차림, 액세서리
+2. 외모 정보 (appearance): 
+   - 나이, 성별 (반드시 '남성' 또는 '여성'으로 명확히 표기)
+   - 키, 체형
+   - 머리색, 머리스타일
+   - 눈색
+   - 피부톤 (밝은/어두운/중간/태닝된 등)
+   - 피부 세부사항 (여드름, 주름, 잡티, 흉터, 매끄러움, 거친 피부 등 피부 상태)
+   - 얼굴 특징 (얼굴형, 코, 입술, 턱선 등)
+   - 옷차림, 액세서리
 3. 성격 (personality): 성격 특성, 기질, 습관, 말투
 4. 배경 정보 (background): 직업, 학력, 가족, 고향, 관심사
 
@@ -56,13 +64,15 @@ export class LLMService {
   "name": "인물 이름",
   "appearance": {{
     "age": "나이",
-    "gender": "성별",
+    "gender": "성별 (반드시 '남성' 또는 '여성'으로 명확히 표기)",
     "height": "키",
     "build": "체형",
     "hairColor": "머리색",
     "hairStyle": "머리스타일",
     "eyeColor": "눈색",
-    "facialFeatures": "얼굴 특징",
+    "skinTone": "피부톤 (예: 밝은 피부, 어두운 피부, 태닝된 피부 등)",
+    "skinDetails": "피부 세부사항 (예: 여드름이 많음, 주름이 많음, 매끄러운 피부, 잡티가 있음, 흉터가 있음 등)",
+    "facialFeatures": "얼굴 특징 (얼굴형, 코, 입술, 턱선 등)",
     "clothing": "옷차림",
     "accessories": "액세서리"
   }},
@@ -80,6 +90,8 @@ export class LLMService {
     "interests": ["관심사1", "관심사2"]
   }}
 }}
+
+중요: 정보가 없는 경우 "알 수 없음"으로 표기하세요.
 `);
 
     // 채팅봇 대화용 프롬프트 (개선된 버전)
@@ -119,8 +131,10 @@ export class LLMService {
 성격: {personality}
 직업: {occupation}
 
+**중요: 성별 정보를 정확히 반영해주세요. 남성이면 반드시 male/man으로, 여성이면 반드시 female/woman으로 명시해주세요.**
+
 캐리커쳐 스타일로, 친근하고 따뜻한 느낌의 일러스트레이션으로 생성해주세요.
-영어로 상세한 프롬프트를 작성해주세요.
+성별 정보를 프롬프트 앞부분에 명확히 포함시켜 영어로 상세한 프롬프트를 작성해주세요.
 `);
   }
 
@@ -235,6 +249,8 @@ export class LLMService {
     if (appearance.hairColor) parts.push(`머리색: ${appearance.hairColor}`);
     if (appearance.hairStyle) parts.push(`머리스타일: ${appearance.hairStyle}`);
     if (appearance.eyeColor) parts.push(`눈색: ${appearance.eyeColor}`);
+    if (appearance.skinTone) parts.push(`피부톤: ${appearance.skinTone}`);
+    if (appearance.skinDetails) parts.push(`피부 세부사항: ${appearance.skinDetails}`);
     if (appearance.facialFeatures) parts.push(`얼굴 특징: ${appearance.facialFeatures}`);
     if (appearance.clothing) parts.push(`옷차림: ${appearance.clothing}`);
     if (appearance.accessories) parts.push(`액세서리: ${appearance.accessories}`);

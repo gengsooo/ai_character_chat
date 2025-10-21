@@ -15,6 +15,7 @@ const HomePage = () => {
   const [currentStep, setCurrentStep] = useState<'upload' | 'display' | 'chat'>('upload');
   const [character, setCharacter] = useState<CharacterInfo | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string>('');
+  const [characterImageUrl, setCharacterImageUrl] = useState<string>('');
 
   /**
    * PDF 업로드 성공 처리
@@ -39,6 +40,7 @@ const HomePage = () => {
    */
   const handleImageGenerated = (imageUrl: string) => {
     setGeneratedImageUrl(imageUrl);
+    setCharacterImageUrl(imageUrl); // 채팅용 이미지 URL 설정
     // 캐릭터 정보에 이미지 URL 추가
     if (character) {
       setCharacter({
@@ -62,6 +64,7 @@ const HomePage = () => {
     setCurrentStep('upload');
     setCharacter(null);
     setGeneratedImageUrl('');
+    setCharacterImageUrl('');
   };
 
   /**
@@ -157,7 +160,7 @@ const HomePage = () => {
           </div>
           <h3 className="font-semibold text-gray-900 mb-2">자연스러운 대화</h3>
           <p className="text-sm text-gray-600">
-            인물의 성격과 배경에 맞는 자연스러운 대화를 즐길 수 있습니다.
+            인물의 성격과 배경을 바탕으로 자연스러운 대화를 나눌 수 있습니다.
           </p>
         </div>
       </div>
@@ -198,6 +201,7 @@ const HomePage = () => {
       {character && (
         <CharacterDisplay 
           character={character}
+          imageUrl={characterImageUrl}
           onImageGenerated={handleImageGenerated}
         />
       )}
@@ -236,7 +240,7 @@ const HomePage = () => {
         </p>
       </div>
 
-      {character && <ChatInterface character={character} />}
+      {character && <ChatInterface character={character} imageUrl={characterImageUrl} />}
 
       <div className="flex justify-center space-x-4">
         <button

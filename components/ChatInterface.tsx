@@ -6,15 +6,17 @@ import { CharacterInfo, ChatMessage } from '@/types/character';
 
 interface ChatInterfaceProps {
   character: CharacterInfo;
+  imageUrl?: string; // 생성된 캐릭터 이미지 URL
 }
 
 /**
  * 인물과의 채팅 인터페이스 컴포넌트
  */
-const ChatInterface = ({ character }: ChatInterfaceProps) => {
+const ChatInterface = ({ character, imageUrl }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +45,9 @@ const ChatInterface = ({ character }: ChatInterfaceProps) => {
    * 스크롤을 맨 아래로 이동
    */
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   /**
@@ -171,24 +175,26 @@ const ChatInterface = ({ character }: ChatInterfaceProps) => {
       <div className="flex items-center space-x-3 p-4 border-b border-gray-200">
         {/* 캐릭터 이미지 또는 기본 아바타 */}
         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-          {character.imageUrl ? (
+          {imageUrl ? (
             <img 
-              src={character.imageUrl} 
+              src={imageUrl} 
               alt={character.name}
               className="w-full h-full object-cover"
               onError={(e) => {
-                // 이미지 로드 실패시 기본 아바타로 변경
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
-                target.nextElementSibling?.classList.remove('hidden');
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-white"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>';
+                }
               }}
             />
-          ) : null}
-          <div className={`w-full h-full bg-secondary-500 flex items-center justify-center ${character.imageUrl ? 'hidden' : ''}`}>
-            <Bot className="w-5 h-5 text-white" />
-          </div>
+          ) : (
+            <Bot className="w-4 h-4 text-white" />
+          )}
         </div>
-        <div>
+         {/* 캐릭터 정보 */}
+         <div>
           <h3 className="font-semibold text-gray-800">{character.name}</h3>
           <p className="text-sm text-gray-500">
             {character.background?.occupation || 'AI 어시스턴트'}
@@ -197,7 +203,7 @@ const ChatInterface = ({ character }: ChatInterfaceProps) => {
       </div>
 
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map(renderMessage)}
         
         {/* 로딩 인디케이터 */}

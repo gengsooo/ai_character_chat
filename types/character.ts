@@ -11,6 +11,8 @@ export interface CharacterInfo {
     hairColor?: string;
     hairStyle?: string;
     eyeColor?: string;
+    skinTone?: string; // 피부색/피부톤 (밝은, 어두운, 중간 등)
+    skinDetails?: string; // 피부 세부사항 (여드름, 주름, 잡티, 매끄러움 등)
     facialFeatures?: string;
     clothing?: string;
     accessories?: string;

@@ -23,8 +23,6 @@ export class ImageGeneratorService {
     try {
       const prompt = this.buildImagePrompt(request);
       
-      console.log('이미지 생성 프롬프트:', prompt);
-
       // 고품질 SDXL 모델 사용
       const output = await this.replicate.run(
         "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
@@ -61,7 +59,6 @@ export class ImageGeneratorService {
       // NSFW 오류인 경우 더 안전한 모델로 재시도
       if (error instanceof Error && error.message.includes('NSFW')) {
         try {
-          console.log('🔄 더 안전한 모델로 재시도...');
           const safePrompt = 'high quality cartoon character, professional digital art, clean style, friendly face, masterpiece';
           
           const safeOutput = await this.replicate.run(
@@ -159,12 +156,31 @@ export class ImageGeneratorService {
     const { characterInfo, style = 'cartoon', mood = 'friendly' } = request;
     const { appearance } = characterInfo;
 
-    // 고품질 캐릭터 아바타 프롬프트
-    let prompt = 'high quality cartoon character portrait, professional digital art, clean vector style, detailed illustration';
-
-    // 성별 추가
+    // 성별을 먼저 명확히 지정
+    let genderPrompt = '';
     if (appearance.gender) {
-      prompt += `, ${appearance.gender === '남성' ? 'handsome male' : 'beautiful female'} character`;
+      if (appearance.gender.includes('남') || appearance.gender.toLowerCase().includes('male')) {
+        genderPrompt = 'handsome male man, masculine features, ';
+      } else if (appearance.gender.includes('여') || appearance.gender.toLowerCase().includes('female')) {
+        genderPrompt = 'beautiful female woman, feminine features, ';
+      }
+    }
+
+    // 고품질 캐릭터 아바타 프롬프트 (성별을 맨 앞에 배치)
+    let prompt = `${genderPrompt}high quality cartoon character portrait, professional digital art, clean vector style, detailed illustration`;
+
+    // 나이대 추가
+    if (appearance.age) {
+      const ageNum = parseInt(appearance.age);
+      if (ageNum < 20) {
+        prompt += ', young person';
+      } else if (ageNum < 40) {
+        prompt += ', adult person';
+      } else if (ageNum < 60) {
+        prompt += ', middle-aged person';
+      } else {
+        prompt += ', elderly person';
+      }
     }
 
     // 머리 색깔 추가 (안전한 범위내에서)
@@ -175,6 +191,64 @@ export class ImageGeneratorService {
         prompt += ', warm brown hair';
       } else if (appearance.hairColor.includes('검')) {
         prompt += ', sleek black hair';
+      } else if (appearance.hairColor.includes('흰') || appearance.hairColor.includes('백')) {
+        prompt += ', silver white hair';
+      }
+    }
+
+    // 머리 스타일 추가
+    if (appearance.hairStyle && appearance.hairStyle !== '알 수 없음') {
+      if (appearance.hairStyle.includes('짧')) {
+        prompt += ', short hair';
+      } else if (appearance.hairStyle.includes('긴')) {
+        prompt += ', long hair';
+      } else if (appearance.hairStyle.includes('곱슬')) {
+        prompt += ', curly hair';
+      }
+    }
+
+    // 피부톤 추가
+    if (appearance.skinTone && appearance.skinTone !== '알 수 없음') {
+      if (appearance.skinTone.includes('밝은') || appearance.skinTone.includes('하얀') || appearance.skinTone.toLowerCase().includes('fair') || appearance.skinTone.toLowerCase().includes('pale')) {
+        prompt += ', fair skin tone, light complexion';
+      } else if (appearance.skinTone.includes('어두운') || appearance.skinTone.includes('검은') || appearance.skinTone.toLowerCase().includes('dark')) {
+        prompt += ', dark skin tone, rich complexion';
+      } else if (appearance.skinTone.includes('태닝') || appearance.skinTone.includes('그을린') || appearance.skinTone.toLowerCase().includes('tan')) {
+        prompt += ', tanned skin, sun-kissed complexion';
+      } else if (appearance.skinTone.includes('중간') || appearance.skinTone.includes('보통') || appearance.skinTone.toLowerCase().includes('medium')) {
+        prompt += ', medium skin tone, natural complexion';
+      } else if (appearance.skinTone.includes('황') || appearance.skinTone.toLowerCase().includes('olive')) {
+        prompt += ', olive skin tone, warm complexion';
+      }
+    }
+
+    // 피부 세부사항 추가
+    if (appearance.skinDetails && appearance.skinDetails !== '알 수 없음') {
+      const skinDetailsLower = appearance.skinDetails.toLowerCase();
+      
+      // 여드름
+      if (appearance.skinDetails.includes('여드름') || skinDetailsLower.includes('acne') || skinDetailsLower.includes('pimple')) {
+        prompt += ', skin with acne, blemished skin';
+      }
+      
+      // 주름
+      if (appearance.skinDetails.includes('주름') || skinDetailsLower.includes('wrinkle') || skinDetailsLower.includes('aged')) {
+        prompt += ', wrinkled skin, aged skin texture';
+      }
+      
+      // 잡티/흉터
+      if (appearance.skinDetails.includes('잡티') || appearance.skinDetails.includes('흉터') || skinDetailsLower.includes('scar') || skinDetailsLower.includes('spot')) {
+        prompt += ', skin with spots, visible skin marks';
+      }
+      
+      // 매끄러운 피부
+      if (appearance.skinDetails.includes('매끄') || appearance.skinDetails.includes('깨끗') || skinDetailsLower.includes('smooth') || skinDetailsLower.includes('clear')) {
+        prompt += ', smooth clear skin, flawless complexion';
+      }
+      
+      // 거친 피부
+      if (appearance.skinDetails.includes('거친') || appearance.skinDetails.includes('건조') || skinDetailsLower.includes('rough') || skinDetailsLower.includes('dry')) {
+        prompt += ', rough skin texture, dry skin';
       }
     }
 
