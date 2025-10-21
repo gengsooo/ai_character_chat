@@ -115,9 +115,6 @@ const CharacterDisplay = ({ character, onImageGenerated }: CharacterDisplayProps
       {/* 헤더 */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{character.name}</h2>
-        <p className="text-gray-600">
-          {character.background?.occupation || '직업 정보 없음'}
-        </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
